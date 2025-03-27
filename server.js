@@ -363,6 +363,65 @@
 
 
 
+// import express from "express";
+// import dotenv from "dotenv";
+// import mongoose from "mongoose";
+// import cors from "cors";
+// import { createServer } from "http";
+// import { Server } from "socket.io";
+// import organizationRoutes from "./routes/organizationRoutes.js";
+// import userRoutes from "./routes/userRoutes.js";
+// import authRoutes from "./routes/authRoutes.js";
+// import adminRoutes from "./routes/adminRoutes.js"; // 🔹 New Admin Routes
+// import { connectDB } from "./config/db.js";
+// import { handleLocationTracking } from "./socket/locationTracking.js";
+
+// dotenv.config();
+// connectDB();
+
+// const app = express();
+// const httpServer = createServer(app);
+
+// // Initialize Socket.io
+// const io = new Server(httpServer, {
+//   cors: {
+//     origin: "http://localhost:3000", // Change this if needed
+//     methods: ["GET", "POST"],
+//     credentials: true
+//   }
+// });
+
+// // Middleware
+// app.use(cors());
+// app.use(express.json());
+
+// // Routes
+// console.log("✅ Routes are being loaded");
+// app.use("/api", organizationRoutes);
+// app.use("/api/users", userRoutes);
+// app.use("/api/auth", authRoutes);
+// app.use("/api/admin", adminRoutes); // 🔹 Registered Admin Routes
+
+// // Default route
+// app.get("/", (req, res) => {
+//   res.send("🚀 Backend is running successfully!");
+// });
+
+// // Handle location tracking
+// handleLocationTracking(io);
+
+// // MongoDB connection
+// mongoose
+//   .connect(process.env.MONGO_URI)
+//   .then(() => console.log("✅ MongoDB Connected"))
+//   .catch((err) => console.error("❌ MongoDB Error:", err));
+
+// // Start the server
+// const PORT = process.env.PORT || 5000;
+// httpServer.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+
+
+
 import express from "express";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
@@ -382,17 +441,27 @@ connectDB();
 const app = express();
 const httpServer = createServer(app);
 
+// Allowed origins for CORS
+const allowedOrigins = [
+  "http://localhost:3000", // Local development
+  process.env.FRONTEND_URL || "https://umrah-connect.web.app" // Production frontend
+];
+
 // Initialize Socket.io
 const io = new Server(httpServer, {
   cors: {
-    origin: "http://localhost:3000", // Change this if needed
+    origin: allowedOrigins,
     methods: ["GET", "POST"],
     credentials: true
   }
 });
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: allowedOrigins,
+  methods: ["GET", "POST"],
+  credentials: true
+}));
 app.use(express.json());
 
 // Routes
@@ -405,6 +474,11 @@ app.use("/api/admin", adminRoutes); // 🔹 Registered Admin Routes
 // Default route
 app.get("/", (req, res) => {
   res.send("🚀 Backend is running successfully!");
+});
+
+// Health check route
+app.get("/health", (req, res) => {
+  res.status(200).send("Server is healthy!");
 });
 
 // Handle location tracking
