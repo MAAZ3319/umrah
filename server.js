@@ -443,8 +443,8 @@ const httpServer = createServer(app);
 
 // Allowed origins for CORS
 const allowedOrigins = [
-  "http://localhost:3000", // Local development
-  process.env.FRONTEND_URL || "https://umrah-connect.web.app" // Production frontend
+  process.env.FRONTEND_URL || "https://umrah-connect.web.app", // Production frontend
+  // "http://localhost:3000" // Local development
 ];
 
 // Initialize Socket.io

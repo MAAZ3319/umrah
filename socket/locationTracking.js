@@ -92,7 +92,6 @@
 
 
 // // new socket/locationTracking.js
-
 import { getDistance } from "../utils/distance.js";
 import Organization from "../models/Organization.js";
 
@@ -105,6 +104,10 @@ export const handleLocationTracking = (io) => {
 
     socket.on("updateLocation", async ({ latitude, longitude, userId, userName, orgEmail }) => {
       try {
+        if (!orgEmail) {
+          return console.error("❌ orgEmail is missing in updateLocation event");
+        }
+
         const organization = await Organization.findOne({ orgEmail });
         if (!organization) {
           return console.error("❌ Organization not found");
@@ -119,12 +122,14 @@ export const handleLocationTracking = (io) => {
           alerts.push("🚨 You are outside the 500m safe area!");
         }
 
-        fixedLocations.forEach((loc) => {
-          const locDistance = getDistance(latitude, longitude, loc.latitude, loc.longitude);
-          if (locDistance <= 500) {
-            alerts.push(`🗺️ You are near ${loc.name}`);
-          }
-        });
+        if (Array.isArray(fixedLocations)) {
+          fixedLocations.forEach((loc) => {
+            const locDistance = getDistance(latitude, longitude, loc.latitude, loc.longitude);
+            if (locDistance <= 500) {
+              alerts.push(`🗺️ You are near ${loc.name}`);
+            }
+          });
+        }
 
         if (alerts.length > 0) {
           socket.emit("alert", { messages: alerts });
@@ -134,30 +139,35 @@ export const handleLocationTracking = (io) => {
         userLocations.set(userId, { latitude, longitude });
 
         // Track online users
-        onlineUsers.set(userId, { socketId: socket.id, latitude, longitude, userName });
+        onlineUsers.set(userId, { socketId: socket.id, latitude, longitude, userName, orgEmail });
 
         // Broadcast updates
         socket.broadcast.emit("locationUpdate", { userId, latitude, longitude });
         io.emit("onlineUsers", Array.from(onlineUsers.values())); // Send online users to all clients
       } catch (error) {
         console.error("❌ Location Update Error:", error);
+        socket.emit("error", { message: "An error occurred while updating location." });
       }
     });
 
-    socket.on("disconnect", () => {
+    socket.on("disconnect", async () => {
       for (const [userId, user] of onlineUsers.entries()) {
         if (user.socketId === socket.id) {
           onlineUsers.delete(userId);
+
+          // Fetch fixedLocations from the organization
+          const organization = await Organization.findOne({ orgEmail: user.orgEmail });
+          if (organization) {
+            io.emit("updateLocations", organization.fixedLocations); // Send fixed locations to all clients
+          }
           break;
         }
       }
-      io.emit("updateLocations", fixedLocations); // Send fixed locations to all clients
 
       io.emit("onlineUsers", Array.from(onlineUsers.values()).map(user => ({
         userId: user.userId,
         userName: user.userName,
-    })));
-    
+      })));
     });
   });
 };
