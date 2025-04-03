@@ -33,6 +33,7 @@ export const protect = (req, res, next) => {
   }
 };
 
+
 // 🔹 Admin Middleware (New)
 export const adminProtect = (req, res, next) => {
   if (req.user.role !== "admin") {
