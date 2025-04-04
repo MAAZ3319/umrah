@@ -497,6 +497,82 @@
 
 
 
+// import express from "express";
+// import dotenv from "dotenv";
+// import mongoose from "mongoose";
+// import cors from "cors";
+// import { createServer } from "http";
+// import { Server } from "socket.io";
+// import organizationRoutes from "./routes/organizationRoutes.js";
+// import userRoutes from "./routes/userRoutes.js";
+// import authRoutes from "./routes/authRoutes.js";
+// import adminRoutes from "./routes/adminRoutes.js"; // 🔹 New Admin Routes
+// import { connectDB } from "./config/db.js";
+// import { handleLocationTracking } from "./socket/locationTracking.js";
+
+// dotenv.config();
+// connectDB();
+
+// const app = express();
+// const httpServer = createServer(app);
+
+// // Allowed origins for CORS
+// const allowedOrigins = [
+//   "https://umrah-connect.web.app", // Production frontend
+//   "http://localhost:3000" // Local development
+// ];
+
+// // Initialize Socket.io
+// const io = new Server(httpServer, {
+//   cors: {
+//     origin: allowedOrigins,
+//     methods: ["GET", "POST"],
+//     credentials: true,
+//   },
+// });
+
+// // Middleware
+// app.use(
+//   cors({
+//     origin: allowedOrigins,
+//     methods: ["GET", "POST"],
+//     credentials: true,
+//   })
+// );
+// app.use(express.json());
+
+// // Routes
+// console.log("✅ Routes are being loaded");
+// app.use("/api", organizationRoutes);
+// app.use("/api/users", userRoutes);
+// app.use("/api/auth", authRoutes);
+// app.use("/api/admin", adminRoutes); // 🔹 Registered Admin Routes
+
+// // Default route
+// app.get("/", (req, res) => {
+//   res.send("🚀 Backend is running successfully!");
+// });
+
+// // Health check route
+// app.get("/health", (req, res) => {
+//   res.status(200).send("Server is healthy!");
+// });
+
+// // Handle location tracking
+// handleLocationTracking(io);
+
+// // MongoDB connection
+// mongoose
+//   .connect(process.env.MONGO_URI)
+//   .then(() => console.log("✅ MongoDB Connected"))
+//   .catch((err) => console.error("❌ MongoDB Error:", err));
+
+// // Start the server
+// const PORT = process.env.PORT || 5000;
+// httpServer.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+
+//above worked 
+
 import express from "express";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
@@ -506,7 +582,7 @@ import { Server } from "socket.io";
 import organizationRoutes from "./routes/organizationRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
-import adminRoutes from "./routes/adminRoutes.js"; // 🔹 New Admin Routes
+import adminRoutes from "./routes/adminRoutes.js";
 import { connectDB } from "./config/db.js";
 import { handleLocationTracking } from "./socket/locationTracking.js";
 
@@ -516,7 +592,7 @@ connectDB();
 const app = express();
 const httpServer = createServer(app);
 
-// Allowed origins for CORS
+// Allowed origins
 const allowedOrigins = [
   "https://umrah-connect.web.app", // Production frontend
   "http://localhost:3000" // Local development
@@ -528,6 +604,7 @@ const io = new Server(httpServer, {
     origin: allowedOrigins,
     methods: ["GET", "POST"],
     credentials: true,
+    allowedHeaders: ["Authorization", "Content-Type"],
   },
 });
 
@@ -546,16 +623,11 @@ console.log("✅ Routes are being loaded");
 app.use("/api", organizationRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/auth", authRoutes);
-app.use("/api/admin", adminRoutes); // 🔹 Registered Admin Routes
+app.use("/api/admin", adminRoutes);
 
 // Default route
 app.get("/", (req, res) => {
   res.send("🚀 Backend is running successfully!");
-});
-
-// Health check route
-app.get("/health", (req, res) => {
-  res.status(200).send("Server is healthy!");
 });
 
 // Handle location tracking
@@ -567,6 +639,6 @@ mongoose
   .then(() => console.log("✅ MongoDB Connected"))
   .catch((err) => console.error("❌ MongoDB Error:", err));
 
-// Start the server
+// Start server
 const PORT = process.env.PORT || 5000;
 httpServer.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));

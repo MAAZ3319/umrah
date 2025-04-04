@@ -8,19 +8,23 @@ export const handleLocationTracking = (io) => {
     console.log("🟢 User connected:", socket.id);
 
     socket.on("updateLocation", async ({ latitude, longitude, userName, orgEmail }) => {
+      console.log(`📡 Received location update from ${userName}:`, { latitude, longitude });
 
-      console.log(`Received location update from ${userName}:`, { latitude, longitude });
+      if (!latitude || !longitude) {
+        console.error("❌ Invalid location data received:", { latitude, longitude });
+        return;
+      }
+      if (!orgEmail) {
+        console.error("❌ orgEmail is missing in updateLocation event");
+        return;
+      }
+
       try {
-        if (!orgEmail) {
-          return console.error("❌ orgEmail is missing in updateLocation event");
-        }
-
         const organization = await Organization.findOne({ orgEmail });
         if (!organization) {
           return console.error("❌ Organization not found");
         }
 
-        // Check distance from organization center
         const { orgLat, orgLng, fixedLocations } = organization;
         const orgDistance = getDistance(latitude, longitude, orgLat, orgLng);
 
@@ -46,6 +50,7 @@ export const handleLocationTracking = (io) => {
         onlineUsers.set(socket.id, { socketId: socket.id, latitude, longitude, userName, orgEmail });
 
         // Broadcast updates
+        console.log("👥 Broadcasting online users:", Array.from(onlineUsers.values()));
         io.emit("onlineUsers", Array.from(onlineUsers.values())); // Send online users to all clients
       } catch (error) {
         console.error("❌ Location Update Error:", error);
