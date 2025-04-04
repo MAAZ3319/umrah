@@ -8,7 +8,7 @@ export const handleLocationTracking = (io) => {
     console.log("🟢 User connected:", socket.id);
 
     socket.on("updateLocation", async ({ latitude, longitude, name, orgEmail }) => {
-      console.log(`📡 Received location update from ${email.name}:`, { latitude, longitude });
+      console.log(`📡 Received location update from ${name}:`, { latitude, longitude });
 
       if (!latitude || !longitude) {
         console.error("❌ Invalid location data received:", { latitude, longitude });
