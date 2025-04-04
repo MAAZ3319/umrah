@@ -7,8 +7,8 @@ export const handleLocationTracking = (io) => {
   io.on("connection", (socket) => {
     console.log("🟢 User connected:", socket.id);
 
-    socket.on("updateLocation", async ({ latitude, longitude, userName, orgEmail }) => {
-      console.log(`📡 Received location update from ${userName}:`, { latitude, longitude });
+    socket.on("updateLocation", async ({ latitude, longitude, name, orgEmail }) => {
+      console.log(`📡 Received location update from ${name}:`, { latitude, longitude });
 
       if (!latitude || !longitude) {
         console.error("❌ Invalid location data received:", { latitude, longitude });
@@ -47,7 +47,7 @@ export const handleLocationTracking = (io) => {
         }
 
         // Track online users
-        onlineUsers.set(socket.id, { socketId: socket.id, latitude, longitude, userName, orgEmail });
+        onlineUsers.set(socket.id, { socketId: socket.id, latitude, longitude, name, orgEmail });
 
         // Broadcast updates
         console.log("👥 Broadcasting online users:", Array.from(onlineUsers.values()));
