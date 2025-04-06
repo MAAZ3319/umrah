@@ -77,10 +77,12 @@ const onlineUsers = new Map(); // Track online users
 
 export const handleLocationTracking = (io) => {
   io.on("connection", (socket) => {
-    console.log("🟢 User connected:", socket.id);
+    console.log("🟢 User connected:", socket.id );
 
     socket.on("updateLocation", async ({ latitude, longitude, name, orgEmail, email }) => {
-      console.log(`📡 Received location update from ${name}:`, { latitude, longitude });
+      console.log(`📡 Received location update from ${name}:${email}`, { latitude, longitude });
+
+      console.log("Looking for user with email:", email);
 
       const user = await User.findOne({ email });
 
