@@ -216,8 +216,8 @@ const router = express.Router();
 // 🔒 Register New User
 router.post("/register", async (req, res) => {
   try {
-    const { name, email, password, orgEmail, role } = req.body;
-    if (!name || !email || !password || !orgEmail) {
+    const { name, email, password, orgEmail, role, phone, photo } = req.body;
+    if (!name || !email || !password || !orgEmail || !phone || !photo) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
@@ -240,6 +240,8 @@ router.post("/register", async (req, res) => {
       password, // Schema will handle hashing
       organizationId: organization._id,
       role: role || "user",
+      phone,
+      photo
     });
 
     await newUser.save();
@@ -284,7 +286,9 @@ router.post("/login", async (req, res) => {
       id: user._id,
       name: user.name,
       orgEmail: user.organizationId.orgEmail,
-      role:user.role
+      role:user.role,
+      phone:user.phone,
+      photo:user.photo
     };
 
     res.status(200).json({

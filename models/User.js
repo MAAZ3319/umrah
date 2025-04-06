@@ -42,6 +42,10 @@ const userSchema = new mongoose.Schema({
   email: { type: String, unique: true, required: true },
   password: { type: String, required: true },
   organizationId: { type: mongoose.Schema.Types.ObjectId, ref: "Organization" },
+  phone: { type: Number, required: true },
+  photo: {
+    type: String, required:true // base64 string
+  },
   role: { type: String, enum: ["admin", "user"], default: "user" }, // Added role
 });
 

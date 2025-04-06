@@ -8,9 +8,9 @@ const router = express.Router();
 // ✅ Add User to Organization
 router.post("/add-user", async (req, res) => {
   try {
-    const { name, email, password, orgEmail } = req.body;
+    const { name, email, password, orgEmail, phone, photo } = req.body;
 
-    if (!name || !email || !password || !orgEmail) {
+    if (!name || !email || !password || !orgEmail || !phone || !photo) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
@@ -33,6 +33,8 @@ router.post("/add-user", async (req, res) => {
       email,
       password,
       organizationId: organization._id,
+      phone,
+      photo,
     });
 
     await newUser.save();
