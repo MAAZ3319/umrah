@@ -128,8 +128,8 @@ export const handleLocationTracking = (io) => {
         }
 
         // Track online users
-        onlineUsers.set(socket.id, { socketId: socket.id, latitude, longitude, name: user.name, orgEmail, phone,
-          photo, });
+        onlineUsers.set(socket.id, { socketId: socket.id, latitude, longitude, name: user.name, orgEmail, phone: user.phone,
+          photo: user.photo, });
 
         // Broadcast updates
         console.log("👥 Broadcasting online users:", Array.from(onlineUsers.values()));
