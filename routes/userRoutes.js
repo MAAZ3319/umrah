@@ -55,13 +55,16 @@ router.post("/add-user", async (req, res) => {
 router.get("/users/:orgEmail", async (req, res) => {
   try {
     const { orgEmail } = req.params;
-    const organization = await Organization.findOne({ orgEmail });
+    const organization = await Organization.findOne({ orgEmail }).select("name email phone photo _id");
 
     if (!organization) {
       return res.status(404).json({ message: "Organization not found" });
     }
 
-    const users = await User.find({ organizationId: organization._id }).select("name email _id");
+    // const users = await User.find({ organizationId: organization._id }).select("name email _id");
+
+    const users = await User.find({ organizationId: organization._id }).select("name email phone photo _id");
+
     res.status(200).json(users);
   } catch (error) {
     console.error("❌ Error Fetching Users:", error);

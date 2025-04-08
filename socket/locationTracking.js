@@ -74,6 +74,8 @@ import Organization from "../models/Organization.js";
 import User from "../models/User.js"; // ✅ Import User model
 
 const onlineUsers = new Map(); // Track online users
+const userIdToSocket = {};     // 🔥 NEW tracking by userId
+
 
 export const handleLocationTracking = (io) => {
   io.on("connection", (socket) => {
@@ -127,13 +129,18 @@ export const handleLocationTracking = (io) => {
           socket.emit("alert", { messages: alerts });
         }
 
+        userIdToSocket[user._id] = socket.id; //added
+
         // Track online users
         onlineUsers.set(socket.id, { socketId: socket.id, latitude, longitude, name: user.name, orgEmail, phone: user.phone,
-          photo: user.photo, });
+          photo: user.photo,         userId: user._id.toString() // 🔥 Add this if needed for reference
+        });
 
         // Broadcast updates
         console.log("👥 Broadcasting online users:", Array.from(onlineUsers.values()));
         io.emit("onlineUsers", Array.from(onlineUsers.values())); // Send online users to all clients
+        io.emit("online-user-ids", Object.keys(userIdToSocket));
+
       } catch (error) {
         console.error("❌ Location Update Error:", error);
         socket.emit("error", { message: "An error occurred while updating location." });
@@ -142,6 +149,9 @@ export const handleLocationTracking = (io) => {
 
     socket.on("disconnect", () => {
       onlineUsers.delete(socket.id);
+      for (const [id, sockId] of Object.entries(userIdToSocket)) {
+        if (sockId === socket.id) delete userIdToSocket[id];
+      }
       io.emit("onlineUsers", Array.from(onlineUsers.values()));
       console.log("🔴 User disconnected:", socket.id);
     });
