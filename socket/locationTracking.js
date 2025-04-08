@@ -138,7 +138,11 @@ export const handleLocationTracking = (io) => {
 
         // Broadcast updates
         console.log("👥 Broadcasting online users:", Array.from(onlineUsers.values()));
-        io.emit("onlineUsers", Array.from(onlineUsers.values())); // Send online users to all clients
+        const activeUsers = Array.from(onlineUsers.entries()).filter(([sockId]) => io.sockets.sockets.get(sockId));
+const activeUsersData = activeUsers.map(([_, userData]) => userData);
+io.emit("onlineUsers", activeUsersData);
+
+        // io.emit("onlineUsers", Array.from(onlineUsers.values())); // Send online users to all clients
         io.emit("online-user-ids", Object.keys(userIdToSocket));
 
       } catch (error) {
